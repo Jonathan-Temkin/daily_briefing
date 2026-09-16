@@ -14,19 +14,29 @@ America/New_York. Use that as "today" throughout.
 ## 1. Pull down persisted state from Drive
 
 Using the Google Drive connector, find the folder named
-`daily-briefing-cloud-data` (search by title) and download these files from
-inside it:
+`daily-briefing-cloud-data` (search by title) and download each of these
+flat files from inside it into the matching path in this checkout:
 
-- `renpho.env` -> write to `renpho-sync/.env` in this checkout
-- `withings.env` -> write to `withings-sync/.env` in this checkout
-- `daily-briefing-data.zip` -> unzip into `data/` at the repo root (this
-  restores `data/renpho_history.csv`, `data/withings_history.csv`,
-  `data/daily_log.csv`, `data/goals.json`, `data/merchant_categories.json`,
-  `data/category_totals.json`, `data/top_merchants.json`,
-  `data/photos/pool/*`, and the `data/*_raw/` archive dirs)
+- `renpho.env` -> `renpho-sync/.env`
+- `withings.env` -> `withings-sync/.env`
+- `renpho_history.csv` -> `data/renpho_history.csv`
+- `withings_history.csv` -> `data/withings_history.csv`
+- `daily_log.csv` -> `data/daily_log.csv`
+- `renpho_latest.json` -> `data/renpho_latest.json`
+- `withings_latest.json` -> `data/withings_latest.json`
+- `goals.json` -> `data/goals.json`
+- `merchant_categories.json` -> `data/merchant_categories.json`
+- `category_totals.json` -> `data/category_totals.json`
+- `top_merchants.json` -> `data/top_merchants.json`
 
-If any of these three files don't exist yet (first-ever run), proceed with
-empty/default state -- the scripts all handle missing history gracefully.
+There is currently no seeded `data/photos/pool/` -- the photo header strip
+will simply be omitted (`pick_photos.py` already handles an empty pool
+gracefully). If the user later uploads photos to a `photos/` subfolder in
+`daily-briefing-cloud-data`, download those into `data/photos/pool/` too.
+
+If any file doesn't exist yet (first-ever run, or a fresh install), proceed
+with empty/default state for that piece -- the scripts all handle missing
+history gracefully.
 
 ## 2. Sync body-composition and activity data
 
@@ -168,15 +178,15 @@ python scripts/render_pdf.py reports/<date>-full.html reports/<date>-full.pdf
 
 ## 10. Persist state back to Drive
 
-1. Re-zip the entire `data/` directory (now containing this run's updated
-   history CSVs, latest.json files, raw dumps, charts, and the
-   possibly-updated `merchant_categories.json` / `category_totals.json` /
-   `top_merchants.json`) as `daily-briefing-data.zip`.
-2. Read the current `withings-sync/.env` (rotated refresh token from step 2).
-3. In the `daily-briefing-cloud-data` Drive folder: trash the previous
-   `daily-briefing-data.zip` and `withings.env`, then upload the new
-   versions under the same names. (`renpho.env` doesn't change -- leave it
-   alone.)
+For each of these files that changed this run --
+`data/renpho_history.csv`, `data/withings_history.csv`,
+`data/daily_log.csv`, `data/renpho_latest.json`, `data/withings_latest.json`,
+`data/merchant_categories.json` (if any new merchant rules were appended),
+`data/category_totals.json`, `data/top_merchants.json`, and
+`withings-sync/.env` (rotated refresh token from step 2) -- find the
+existing file of that name in the `daily-briefing-cloud-data` Drive folder,
+trash it, and upload the new content under the same name. (`renpho.env` and
+`goals.json` don't change during a normal run -- leave them alone.)
 
 This step is not optional -- skipping it means tomorrow's run starts from
 stale history and a dead Withings token.

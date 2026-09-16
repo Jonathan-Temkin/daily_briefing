@@ -11,10 +11,10 @@ any computer is on.
   run.
 - **Where state lives between runs:** a Google Drive folder named
   `daily-briefing-cloud-data`, containing the Renpho/Withings credentials
-  (`renpho.env`, `withings.env`) and a zip of the `data/` history directory
-  (`daily-briefing-data.zip`). Nothing in this repo is secret -- credentials
-  and personal history data are deliberately kept out of git and live only
-  in that Drive folder.
+  (`renpho.env`, `withings.env`) and the `data/` history files as individual
+  flat files (history CSVs, `goals.json`, `merchant_categories.json`, etc).
+  Nothing in this repo is secret -- credentials and personal history data
+  are deliberately kept out of git and live only in that Drive folder.
 - **Scripts** (`renpho-sync/`, `withings-sync/`, `scripts/`) are unchanged
   copies of the local project's scripts -- they only know about relative
   paths under this repo root, so they work the same in the cloud sandbox as
@@ -26,7 +26,7 @@ any computer is on.
 ## One-time setup checklist
 
 1. Google Drive folder `daily-briefing-cloud-data` created and seeded with
-   `renpho.env`, `withings.env`, and `daily-briefing-data.zip` (done as part
+   `renpho.env`, `withings.env`, and the `data/` state files (done as part
    of setting this up -- see the person who set this up if it's missing).
 2. In the routine's settings on https://claude.ai/code/routines, attach the
    Gmail, Google Calendar, Era Context, and Google Drive connectors (these
