@@ -16,7 +16,7 @@ from playwright.sync_api import sync_playwright
 
 def render(input_html: Path, output_pdf: Path):
     with sync_playwright() as p:
-        browser = p.chromium.launch()
+        browser = p.chromium.launch(executable_path="/opt/pw-browsers/chromium")
         page = browser.new_page()
         page.goto(input_html.resolve().as_uri())
         page.wait_for_timeout(200)
