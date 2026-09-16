@@ -165,8 +165,11 @@ python scripts/render_pdf.py reports/<date>-full.html reports/<date>-full.pdf
 
 ## 9. Deliver the report
 
-1. Upload `reports/<date>-full.pdf` to the `daily-briefing-cloud-data` Drive
-   folder (or a `reports/` subfolder inside it, creating it on first run).
+1. Upload `reports/<date>-full.pdf` to the `reports` subfolder inside the
+   `daily-briefing-cloud-data` Drive folder (search for a subfolder titled
+   `reports` there; create it on first run if it doesn't exist yet). Always
+   use this exact location -- don't drop reports directly in the parent
+   folder or vary the location run to run.
 2. Share that file with **jotemkin1@gmail.com** as `writer` (it's already
    the account's own Drive, but sharing/keeping it in the connected account
    is what makes it show up in the Drive mobile app).
