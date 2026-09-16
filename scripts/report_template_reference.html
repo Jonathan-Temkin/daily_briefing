@@ -1,0 +1,472 @@
+<!--
+Structural/style reference for the daily briefing report. Copied from a real
+generated report (reports/{date}-full.html in the original local project)
+with every actual number, name, and transaction replaced by a {{PLACEHOLDER}}
+describing what goes there. The <style> block below is byte-for-byte the
+real one -- reuse it verbatim so every report looks identical. Reproduce the
+section structure and class names exactly; only the placeholder content
+changes.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: Letter; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; padding: 40px 44px 44px;
+    font-family: Arial, "Segoe UI", sans-serif;
+    background: #eef1ec; color: #1d241f; font-size: 12.5px; line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono { font-family: Consolas, Menlo, monospace; }
+
+  .report-header {
+    background: linear-gradient(135deg, #ffffff 0%, #f1f5ef 100%);
+    border: 1px solid #e4e7e1; border-radius: 12px;
+    padding: 20px 26px; margin-bottom: 26px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    box-shadow: 0 2px 10px rgba(29,36,31,0.07);
+  }
+  .report-kicker {
+    font-family: Consolas, Menlo, monospace; font-size: 10.5px; letter-spacing: 2px;
+    color: #6b8f71; text-transform: uppercase; font-weight: bold;
+  }
+  .report-dateline {
+    font-family: Consolas, Menlo, monospace; font-size: 19px; font-weight: bold; letter-spacing: 1px;
+    color: #1d241f; text-transform: uppercase; margin-top: 6px;
+  }
+  .photo-strip { display: flex; gap: 9px; flex-shrink: 0; }
+  .photo-strip img {
+    width: 72px; height: 72px; object-fit: cover; border-radius: 12px;
+    border: 2px solid #ffffff; box-shadow: 0 1px 5px rgba(29,36,31,0.2);
+  }
+
+  .glance-strip { display: flex; gap: 10px; margin: 16px 0 18px; }
+  .glance-chip {
+    flex: 1; border-radius: 10px; padding: 11px 14px; color: #ffffff;
+    box-shadow: 0 2px 8px rgba(29,36,31,0.14);
+  }
+  .glance-chip.c-finance { background: linear-gradient(135deg, #7ba382 0%, #4f6f56 100%); }
+  .glance-chip.c-spend { background: linear-gradient(135deg, #5a9b95 0%, #35706b 100%); }
+  .glance-chip.c-weight { background: linear-gradient(135deg, #c96a41 0%, #9a4a28 100%); }
+  .glance-chip.c-activity { background: linear-gradient(135deg, #d9b53f 0%, #a6841e 100%); }
+  .glance-chip.c-sleep { background: linear-gradient(135deg, #8272ad 0%, #5c4d82 100%); }
+  .glance-chip.c-schedule { background: linear-gradient(135deg, #6f89ad 0%, #465e7d 100%); }
+  .glance-label { font-size: 8.5px; letter-spacing: 0.6px; text-transform: uppercase; opacity: 0.88; font-weight: bold; }
+  .glance-value { font-family: Consolas, Menlo, monospace; font-size: 17px; font-weight: bold; margin-top: 4px; }
+  .glance-sub { font-size: 9px; opacity: 0.92; margin-top: 2px; }
+
+  .section { margin-top: 34px; }
+  .section-header {
+    display: flex; align-items: center; gap: 10px;
+    background: #f2f4f0; border-left: 5px solid #1d241f; border-radius: 0 8px 8px 0;
+    padding: 9px 14px; margin-bottom: 18px;
+    break-after: avoid; break-inside: avoid;
+  }
+  .section-header.finance { background: #eef4ee; border-left-color: #6b8f71; }
+  .section-header.weight { background: #fbeee7; border-left-color: #b3552f; }
+  .section-header.activity { background: #faf5e5; border-left-color: #8a7530; }
+  .section-header.school { background: #eef0f7; border-left-color: #4a5a8a; }
+  .section-header.nutrition { background: #fdeef0; border-left-color: #b3486b; }
+  .widget-grid.nutrition .widget { border-top-color: #b3486b; }
+  .section-title {
+    font-size: 16.5px; letter-spacing: 0.5px; color: #1d241f; text-transform: uppercase;
+    font-weight: bold; font-family: Arial, sans-serif;
+  }
+  .section-sub { font-size: 10.5px; color: #8a897f; }
+  .subsection-title {
+    font-size: 11.5px; font-weight: bold; color: #1d241f; margin: 22px 0 8px;
+    text-transform: uppercase; letter-spacing: 0.4px; break-after: avoid;
+  }
+  .page-break { break-before: page; }
+
+  .row { display: flex; gap: 18px; flex-wrap: wrap; }
+  .row > * { flex: 1; min-width: 240px; }
+
+  .card-shadow { box-shadow: 0 1px 2px rgba(29,36,31,0.05), 0 2px 6px rgba(29,36,31,0.04); }
+
+  .callout-grid { display: flex; flex-direction: column; }
+  .callout { padding: 9px 0; border-bottom: 1px solid #dde2d8; break-inside: avoid; }
+  .callout-grid .callout:first-child { padding-top: 0; }
+  .callout-grid .callout:last-child { border-bottom: none; padding-bottom: 0; }
+  .callout-tag {
+    display: flex; align-items: center; gap: 5px;
+    width: fit-content; font-size: 9px; letter-spacing: 0.6px; text-transform: uppercase;
+    font-weight: bold; color: #5c6660; margin-bottom: 6px;
+  }
+  .callout-tag::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #8a897f; }
+  .callout.flag .callout-tag { color: #b3552f; }
+  .callout.flag .callout-tag::before { background: #b3552f; }
+  .callout.calm .callout-tag { color: #6b8f71; }
+  .callout.calm .callout-tag::before { background: #6b8f71; }
+  .callout-box { background: #ffffff; border: 1px solid #e4e7e1; border-radius: 8px; padding: 9px 13px; }
+  .callout-text { font-size: 12px; }
+  .callout-text b { color: #1d241f; }
+
+  .widget-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 16px; }
+  .widget {
+    background: #ffffff; border: 1px solid #e4e7e1; border-top: 3px solid #8a897f; border-radius: 8px;
+    padding: 11px 12px; break-inside: avoid;
+  }
+  .widget-grid.finance .widget { border-top-color: #6b8f71; }
+  .widget-grid.weight .widget { border-top-color: #b3552f; }
+  .widget-grid.activity .widget { border-top-color: #8a7530; }
+  .widget-label { font-size: 9px; letter-spacing: 0.5px; color: #5c6660; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .widget-value { font-family: Consolas, Menlo, monospace; font-size: 17px; font-weight: bold; color: #1d241f; margin-top: 4px; white-space: nowrap; }
+  .widget-delta { font-size: 10px; margin-top: 4px; font-family: Consolas, Menlo, monospace; }
+  .delta-good { color: #4a7a52; }
+  .delta-bad { color: #b3552f; }
+  .delta-neutral { color: #8a897f; }
+
+  .info-box { border-radius: 8px; padding: 13px 15px; margin: 14px 0; break-inside: avoid; }
+  .info-box.gold { background: linear-gradient(135deg, #fbf7ec 0%, #f7efd9 100%); border: 1px solid #ecdfb9; }
+  .info-box.clay { background: linear-gradient(135deg, #fbeee7 0%, #f7e2d6 100%); border: 1px solid #f0d2c4; }
+  .info-box-title { font-size: 10px; letter-spacing: 0.5px; text-transform: uppercase; font-weight: bold; }
+  .info-box.gold .info-box-title { color: #8a7530; }
+  .info-box.clay .info-box-title { color: #9a4f2c; }
+  .info-box-body { margin-top: 6px; font-size: 12px; color: #1d241f; }
+  .info-box-body .big { font-family: Consolas, Menlo, monospace; font-size: 15px; font-weight: bold; }
+  .info-box.compact { padding: 10px 13px; margin: 8px 0; }
+  .info-box.compact .info-box-body { font-size: 10.5px; line-height: 1.45; }
+  .info-box.compact ul.insights li { margin-bottom: 6px; }
+
+  .chart-row { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0 6px; }
+  .chart-card {
+    background: #ffffff; border: 1px solid #e4e7e1; border-radius: 8px;
+    padding: 8px; break-inside: avoid;
+    box-shadow: 0 1px 2px rgba(29,36,31,0.05), 0 2px 6px rgba(29,36,31,0.04);
+  }
+  .chart-card img { display: block; width: 100%; border-radius: 4px; }
+  .chart-half { width: calc(50% - 5px); }
+  .chart-third { width: calc(33.33% - 7px); }
+  .chart-two-thirds { width: calc(66.66% - 3px); }
+
+  .table-card {
+    background: #ffffff; border: 1px solid #e4e7e1; border-radius: 8px;
+    padding: 2px 12px; margin-bottom: 4px;
+    box-shadow: 0 1px 2px rgba(29,36,31,0.05), 0 2px 6px rgba(29,36,31,0.04);
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 10.5px; }
+  thead { display: table-header-group; }
+  tr { break-inside: avoid; }
+  th {
+    text-align: left; font-size: 9px; letter-spacing: 0.4px; color: #5c6660;
+    text-transform: uppercase; padding: 8px 6px 7px; border-bottom: 1.5px solid #dbe0d8;
+    font-weight: bold; break-after: avoid; background: #f8faf7;
+  }
+  th:first-child { border-radius: 6px 0 0 0; }
+  th:last-child { border-radius: 0 6px 0 0; }
+  td { padding: 4px 6px; border-bottom: 1px solid #eef0ec; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:not([class]):nth-of-type(even) { background: #f7f9f5; }
+  .cat-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+  td.amount { font-family: Consolas, Menlo, monospace; text-align: right; white-space: nowrap; }
+  th.amount { text-align: right; }
+  tr.day-header td { font-weight: bold; background: #f2f6f1; border-left: 3px solid #6b8f71; break-after: avoid; }
+  tr.day-total td { font-weight: bold; font-size: 11.5px; background: #e4e9e0; border-top: 1.5px solid #1d241f; border-bottom: 1.5px solid #1d241f; }
+  tr.day-total td.amount { color: #1d241f; }
+  tr.overdue td { color: #b3552f; }
+  tr.pending td { color: #8a897f; font-style: italic; }
+  .pill { display: inline-block; font-size: 8px; letter-spacing: 0.3px; text-transform: uppercase; padding: 1px 6px; border-radius: 10px; margin-left: 6px; font-style: normal; }
+  .pill.pending { background: #eef1ec; color: #6b6a63; }
+  .pill.overdue { background: #fbeee7; color: #b3552f; }
+  .pill.todo { background: #fbeee7; color: #b3552f; }
+  .pill.new { background: #eef4ee; color: #4f6f56; }
+  .pill.norule { background: #f4ecec; color: #9a4f2c; }
+
+  .card {
+    background: #ffffff; border: 1px solid #e4e7e1; border-radius: 8px;
+    padding: 12px 14px; break-inside: avoid;
+    box-shadow: 0 1px 2px rgba(29,36,31,0.05), 0 2px 6px rgba(29,36,31,0.04);
+  }
+  ul.insights { margin: 0; padding-left: 18px; }
+  ul.insights li { margin-bottom: 9px; }
+  ul.insights li:last-child { margin-bottom: 0; }
+
+  .email-item { margin-bottom: 8px; }
+  .email-from { font-weight: bold; }
+  .email-snip { color: #5c6660; }
+
+  .footer { margin-top: 40px; padding-top: 14px; border-top: 1px solid #dbe0d8; font-size: 9.5px; color: #9a9a92; }
+</style>
+</head>
+<body>
+
+<div class="report-header">
+  <div>
+    <div class="report-kicker">Daily Accountability Report</div>
+    <div class="report-dateline">{{Weekday, Month DD, YYYY}}</div>
+  </div>
+  <div class="photo-strip">
+    <!-- one <img> per photo in data/photos_manifest.json, omit entirely if empty -->
+    <img src="../data/photos/pool/{{photo1}}" alt="">
+  </div>
+</div>
+
+<div class="glance-strip">
+  <div class="glance-chip c-finance">
+    <div class="glance-label">Net worth</div>
+    <div class="glance-value">{{$net worth}}</div>
+    <div class="glance-sub">{{up/down arrow $delta vs yesterday}}</div>
+  </div>
+  <div class="glance-chip c-spend">
+    <div class="glance-label">Spent yesterday</div>
+    <div class="glance-value">{{$amount}}</div>
+    <div class="glance-sub">{{vs $avg/day}}</div>
+  </div>
+  <div class="glance-chip c-weight">
+    <div class="glance-label">Weight</div>
+    <div class="glance-value">{{weight}} lb</div>
+    <div class="glance-sub">{{"N days stale" or delta vs prior}}</div>
+  </div>
+  <div class="glance-chip c-activity">
+    <div class="glance-label">Steps yesterday</div>
+    <div class="glance-value">{{steps}}</div>
+    <div class="glance-sub">{{vs prior day}}</div>
+  </div>
+  <div class="glance-chip c-sleep">
+    <div class="glance-label">Sleep last night</div>
+    <div class="glance-value">{{Xh Ym or &mdash;}}</div>
+    <div class="glance-sub">{{note if stale/missing}}</div>
+  </div>
+  <div class="glance-chip c-schedule">
+    <div class="glance-label">Today</div>
+    <div class="glance-value">{{"Open" or "N mtgs"}}</div>
+    <div class="glance-sub">{{meeting hours or "no meetings"}}</div>
+  </div>
+</div>
+
+<!--
+  CALLOUTS: one .callout per notable finding, tagged Finance/Weight/Activity/
+  Schedule/Email/Nutrition/School. Class "flag" (amber/red accent) for things
+  needing attention, "calm" (green accent) for good/neutral news, no extra
+  class for a plain neutral note. 4-7 callouts is typical. Write 1-3 sentence
+  observations grounded in the real numbers gathered this run -- do not invent
+  figures.
+-->
+<div class="section" style="margin-top:0;">
+  <div class="section-header"><span class="section-title">Callouts</span></div>
+  <div class="callout-grid">
+    <div class="callout flag">
+      <div class="callout-tag">{{Category}}</div>
+      <div class="callout-box callout-text">{{Observation with <b>bolded key numbers</b>.}}</div>
+    </div>
+  </div>
+</div>
+
+<!-- OMSCS/Coursera section: only include if calendar has upcoming assignment-due events; omit entirely otherwise -->
+<div class="section" style="margin-top:14px;">
+  <div class="section-header school" style="margin-bottom:8px;">
+    <span class="section-title" style="font-size:13.5px;">OMSCS / Coursera &mdash; Due Soon</span>
+    <span class="section-sub">{{course name(s)}}</span>
+  </div>
+  <div class="card" style="padding:9px 14px;">
+  <ul class="insights" style="margin:0;">
+    <li style="margin-bottom:5px;"><b>{{Weekday, Month DD &mdash; N days}}</b>: {{assignment name}} <span style="color:#8a897f;">({{course}})</span></li>
+  </ul>
+  </div>
+</div>
+
+<!-- Nutrition section: from the Intake Ledger Google Doc/Sheet; only include if it has an entry for yesterday -->
+<div class="section" style="margin-top:14px;">
+  <div class="section-header nutrition" style="margin-bottom:8px;">
+    <span class="section-title" style="font-size:13.5px;">Nutrition &mdash; Yesterday</span>
+    <span class="section-sub">{{date}}, from the Intake Ledger (Google Drive food log)</span>
+  </div>
+  <div class="widget-grid nutrition" style="margin-bottom:8px;">
+    <div class="widget"><div class="widget-label">Calories</div><div class="widget-value">{{kcal}}</div><div class="widget-delta delta-neutral">{{vs running avg}}</div></div>
+    <div class="widget"><div class="widget-label">Protein (g)</div><div class="widget-value">{{g}}</div><div class="widget-delta delta-neutral">{{avg}}</div></div>
+    <div class="widget"><div class="widget-label">Carbs (g)</div><div class="widget-value">{{g}}</div><div class="widget-delta delta-neutral">{{avg}}</div></div>
+    <div class="widget"><div class="widget-label">Fat (g)</div><div class="widget-value">{{g}}</div><div class="widget-delta delta-neutral">{{avg}}</div></div>
+  </div>
+  <div class="card" style="padding:9px 14px;">
+  <ul class="insights" style="margin:0;">
+    <li style="margin-bottom:5px;">{{food item}} <span style="color:#8a897f;">({{source, qty}})</span> <span style="float:right;">{{cal}} cal</span></li>
+  </ul>
+  </div>
+</div>
+
+<!-- Email highlights: one .card per notable unread email, from Gmail -->
+<div class="section" style="margin-top:14px;">
+  <div class="card">
+    <div class="email-item">
+      <span class="email-from">{{Sender name}}</span> ({{sender email}}) &mdash;
+      <span class="email-snip">{{one-sentence summary of what matters in the email}}</span>
+    </div>
+  </div>
+</div>
+
+<div class="page-break"></div>
+
+<div class="section">
+  <div class="section-header finance"><span class="section-title">Spending &amp; Budget</span><span class="section-sub">figures computed directly from account &amp; transaction data &mdash; not Era's own analysis</span></div>
+
+  <div class="widget-grid finance">
+    <div class="widget"><div class="widget-label">Net worth</div><div class="widget-value">{{$}}</div><div class="widget-delta delta-bad">{{delta vs yesterday}}</div></div>
+    <div class="widget"><div class="widget-label">7-day total</div><div class="widget-value">{{$}}</div><div class="widget-delta delta-neutral">{{date range}}</div></div>
+    <div class="widget"><div class="widget-label">Daily avg</div><div class="widget-value">{{$}}</div><div class="widget-delta delta-neutral">{{date range, excl. today}}</div></div>
+    <div class="widget"><div class="widget-label">Budget</div><div class="widget-value">{{$ or &mdash;}}</div><div class="widget-delta delta-neutral">{{pace note or "no target set yet"}}</div></div>
+  </div>
+
+  <div class="subsection-title" style="margin:14px 0 6px;">Accounts &mdash; every source, grouped by type</div>
+  <div class="widget-grid finance" style="margin-bottom:8px;">
+    <div class="widget"><div class="widget-label">Checking</div><div class="widget-value">{{$}}</div><div class="widget-delta delta-neutral">{{N accounts}}</div></div>
+    <div class="widget"><div class="widget-label">Savings</div><div class="widget-value">{{$}}</div><div class="widget-delta delta-neutral">{{N accounts}}</div></div>
+    <div class="widget"><div class="widget-label">Investment</div><div class="widget-value">{{$}}</div><div class="widget-delta delta-neutral">{{N accounts}}</div></div>
+    <div class="widget"><div class="widget-label">Debt</div><div class="widget-value">{{-$}}</div><div class="widget-delta delta-neutral">{{N credit cards}}</div></div>
+  </div>
+  <div class="table-card">
+  <table>
+    <tr><th>Account</th><th>Institution</th><th class="amount">Balance</th></tr>
+    <tr class="day-header"><td colspan="3">{{Account type}}</td></tr>
+    <tr class="day-total"><td colspan="2">{{Type}} subtotal</td><td class="amount">{{$}}</td></tr>
+    <tr><td>{{Account nickname}} &bull;{{last4}}</td><td>{{Institution}}</td><td class="amount">{{$}}</td></tr>
+    <!-- repeat per account type, then a final grand-total row -->
+    <tr class="day-total" style="border-top:2px solid #1d241f;"><td colspan="2">Net worth (assets &minus; debt)</td><td class="amount">{{$}}</td></tr>
+  </table>
+  </div>
+
+  <div class="subsection-title" style="margin:14px 0 6px;">Spending trends</div>
+  <div class="chart-row">
+    <div class="chart-card chart-half"><img src="../data/charts/spend_trend.png" alt="Daily spending trend"></div>
+    <div class="chart-card chart-half"><img src="../data/charts/cumulative_spend.png" alt="Cumulative spend this month with month-end projection"></div>
+  </div>
+
+  <div class="subsection-title" style="margin:14px 0 6px;">Past 7 days &mdash; every transaction, daily totals</div>
+  <div class="table-card">
+  <table>
+    <tr><th>Description</th><th>Category</th><th class="amount">Amount</th></tr>
+    <tr class="day-header"><td colspan="3">{{Day label}}</td></tr>
+    <tr class="day-total"><td colspan="2">{{Day}} total</td><td class="amount">{{-$}}</td></tr>
+    <tr class="pending"><td>{{Merchant}} <span class="pill pending">pending</span></td><td>{{Category}}</td><td class="amount">{{-$}}</td></tr>
+    <tr><td>{{Merchant}}</td><td>{{Category}}</td><td class="amount">{{-$}}</td></tr>
+  </table>
+  </div>
+
+  <div class="subsection-title" style="margin:14px 0 6px;">Recent large transactions <span class="section-sub" style="text-transform:none;">&mdash; past 90 days, largest to smallest, real spend only</span></div>
+  <div class="table-card">
+  <table>
+    <tr><th>Amount</th><th>Description</th><th>Category</th><th>Date</th></tr>
+    <tr><td class="amount">{{-$}}</td><td>{{Description}}</td><td><span class="cat-dot" style="background:{{category color}};"></span>{{Category}}</td><td>{{Mon DD}}</td></tr>
+  </table>
+  </div>
+
+  <div class="subsection-title" style="margin:14px 0 6px;">Spending by category &mdash; {{prior month}} vs {{current month}} (month-to-date)</div>
+  <div class="chart-row">
+    <div class="chart-card" style="width:100%;"><img src="../data/charts/category_comparison.png" alt="Category spending comparison"></div>
+  </div>
+
+  <div class="chart-row" style="margin-top:10px;">
+    <div class="chart-card chart-half"><img src="../data/charts/category_share_donut.png" alt="Share of this month's spend by category"></div>
+    <div class="chart-card chart-half"><img src="../data/charts/top_merchants.png" alt="Top merchants this month"></div>
+  </div>
+
+  <div class="subsection-title" style="margin:14px 0 6px;">Subscriptions <span class="section-sub" style="text-transform:none;">&mdash; ~{{$total}}/month across {{N}} confirmed recurring charges</span></div>
+  <div class="table-card">
+  <table>
+    <tr><th>Merchant</th><th class="amount">Amount</th><th>Cadence</th><th>Last charged</th></tr>
+    <tr><td>{{Merchant}}</td><td class="amount">{{$}}</td><td>{{cadence}}</td><td>{{date}}{{ <span class="pill overdue">overdue</span> if applicable}}</td></tr>
+  </table>
+  </div>
+
+  <div class="subsection-title" style="margin:14px 0 6px;">Insights &mdash; savings, spending &amp; investments</div>
+  <div class="card">
+  <ul class="insights">
+    <li>{{Grounded observation from the real numbers gathered this run.}}</li>
+  </ul>
+  </div>
+
+  <div class="subsection-title" style="margin:14px 0 6px;">Where you can save</div>
+  <div class="info-box gold compact" style="margin-top:0;">
+    <div class="info-box-body">
+    <ul class="insights" style="margin:0;">
+      <li><b>{{Specific, numbers-backed suggestion.}}</b></li>
+    </ul>
+    </div>
+  </div>
+</div>
+
+<div class="page-break"></div>
+
+<div class="section">
+  <div class="section-header weight"><span class="section-title">Weight &amp; Body Composition</span></div>
+  <!-- info-box.clay "Data is stale" only if last reading is >1 day old; omit if fresh -->
+  <div class="info-box clay" style="margin-top:0;">
+    <div class="info-box-title">Data is stale</div>
+    <div class="info-box-body">{{Last reading date and how many days old.}}</div>
+  </div>
+
+  <div class="widget-grid weight">
+    <div class="widget"><div class="widget-label">Weight</div><div class="widget-value">{{lb}}</div><div class="widget-delta delta-good">{{delta}}</div></div>
+    <div class="widget"><div class="widget-label">BMI</div><div class="widget-value">{{}}</div><div class="widget-delta delta-good">{{delta}}</div></div>
+    <div class="widget"><div class="widget-label">Body fat</div><div class="widget-value">{{%}}</div><div class="widget-delta delta-good">{{delta}}</div></div>
+    <div class="widget"><div class="widget-label">Muscle</div><div class="widget-value">{{%}}</div><div class="widget-delta delta-good">{{delta}}</div></div>
+    <div class="widget"><div class="widget-label">Water</div><div class="widget-value">{{%}}</div><div class="widget-delta delta-neutral">{{delta}}</div></div>
+    <div class="widget"><div class="widget-label">Bone</div><div class="widget-value">{{%}}</div><div class="widget-delta delta-neutral">{{delta}}</div></div>
+    <div class="widget"><div class="widget-label">Protein</div><div class="widget-value">{{%}}</div><div class="widget-delta delta-neutral">{{delta}}</div></div>
+    <div class="widget"><div class="widget-label">Visceral fat</div><div class="widget-value">{{}}</div><div class="widget-delta delta-neutral">{{delta}}</div></div>
+    <div class="widget"><div class="widget-label">BMR</div><div class="widget-value">{{kcal}}</div><div class="widget-delta delta-neutral">kcal/day</div></div>
+    <div class="widget"><div class="widget-label">Body age</div><div class="widget-value">{{}}</div><div class="widget-delta delta-neutral">{{delta}}</div></div>
+    <div class="widget"><div class="widget-label">Lean mass</div><div class="widget-value">{{lb}}</div><div class="widget-delta delta-neutral">{{delta}}</div></div>
+  </div>
+
+  <!-- goal pace info-box: only if a "Weigh-in target" calendar event exists -->
+  <div class="info-box gold">
+    <div class="info-box-title">Goal pace &mdash; from your calendar's cutting plan</div>
+    <div class="info-box-body">{{Compare latest reading to this week's calendar-derived target; note staleness caveats plainly.}}</div>
+  </div>
+
+  <div class="chart-row">
+    <div class="chart-card chart-half"><img src="../data/charts/weight_trend.png" alt="Weight trend"></div>
+    <div class="chart-card chart-half"><img src="../data/charts/body_comp_trend.png" alt="Body fat and muscle trend"></div>
+  </div>
+  <div class="chart-row">
+    <div class="chart-card chart-third"><img src="../data/charts/composition_donut.png" alt="Fat vs fat-free mass"></div>
+    <div class="chart-card chart-two-thirds"><img src="../data/charts/weekly_change_bar.png" alt="Week-over-week weight change"></div>
+  </div>
+
+  <div class="subsection-title">Insights &mdash; weight</div>
+  <div class="card">
+  <ul class="insights">
+    <li>{{Grounded observation.}}</li>
+  </ul>
+  </div>
+</div>
+
+<div class="page-break"></div>
+
+<div class="section">
+  <div class="section-header activity"><span class="section-title">Activity &amp; Sleep</span><span class="section-sub">Withings watch</span></div>
+
+  <div class="section-sub" style="margin-bottom:10px;">{{Note which date the activity/sleep figures reflect.}}</div>
+  <div class="widget-grid activity">
+    <div class="widget"><div class="widget-label">Steps ({{date}})</div><div class="widget-value">{{}}</div><div class="widget-delta delta-bad">{{delta}}</div></div>
+    <div class="widget"><div class="widget-label">Distance ({{date}})</div><div class="widget-value">{{km}}</div><div class="widget-delta delta-good">{{delta}}</div></div>
+    <div class="widget"><div class="widget-label">Active cal ({{date}})</div><div class="widget-value">{{}}</div><div class="widget-delta delta-good">{{delta}}</div></div>
+    <div class="widget"><div class="widget-label">Avg heart rate ({{date}})</div><div class="widget-value">{{bpm}}</div><div class="widget-delta delta-neutral">{{delta}}</div></div>
+    <div class="widget"><div class="widget-label">Sleep ({{date}})</div><div class="widget-value">{{Xh Ym}}</div><div class="widget-delta delta-neutral">{{note}}</div></div>
+    <div class="widget"><div class="widget-label">Sleep efficiency</div><div class="widget-value">{{%}}</div><div class="widget-delta delta-neutral">{{note}}</div></div>
+    <div class="widget"><div class="widget-label">Resting HR</div><div class="widget-value">{{bpm}}</div><div class="widget-delta delta-neutral">{{note}}</div></div>
+  </div>
+
+  <div class="chart-row">
+    <div class="chart-card chart-third"><img src="../data/charts/steps_trend.png" alt="Steps trend"></div>
+    <div class="chart-card chart-third"><img src="../data/charts/sleep_trend.png" alt="Sleep hours trend"></div>
+    <div class="chart-card chart-third"><img src="../data/charts/resting_hr_trend.png" alt="Resting heart rate trend"></div>
+  </div>
+
+  <div class="subsection-title">Insights &mdash; activity &amp; sleep</div>
+  <div class="card">
+  <ul class="insights">
+    <li>{{Grounded observation.}}</li>
+  </ul>
+  </div>
+</div>
+
+<div class="footer">Sourced from Google Calendar, Gmail, Era Context (raw account &amp; transaction data only &mdash; all analysis above is computed independently, not Era's built-in flags), your Renpho account, and your Withings watch. Generated by the daily-briefing cloud routine.</div>
+
+</body>
+</html>
