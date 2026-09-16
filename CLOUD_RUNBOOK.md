@@ -11,11 +11,25 @@ than failing the whole run or inventing numbers.
 Today's date: run `date` (or use your session's current date) in
 America/New_York. Use that as "today" throughout.
 
+This runbook calls out two kinds of parallelism explicitly, rather than
+leaving it to be improvised mid-run:
+
+- **Batched tool calls**: wherever a step involves several independent reads
+  or writes against the same connector (e.g. the 11 Drive files in steps 1
+  and 7), issue them together as one wave of parallel calls, not one after
+  another.
+- **Parallel subagents**: wherever a step's sub-parts are independent of
+  each other and each involves real back-and-forth with a different data
+  source, hand each sub-part to its own subagent and launch them together
+  (step 3).
+
 ## 1. Pull down persisted state from Drive
 
 Using the Google Drive connector, find the folder named
 `daily-briefing-cloud-data` (search by title) and download each of these
-flat files from inside it into the matching path in this checkout:
+flat files from inside it into the matching path in this checkout. These
+11 downloads are independent of each other -- issue them as one parallel
+batch of calls rather than one file at a time:
 
 - `renpho.env` -> `renpho-sync/.env`
 - `withings.env` -> `withings-sync/.env`
@@ -32,7 +46,8 @@ flat files from inside it into the matching path in this checkout:
 There is currently no seeded `data/photos/pool/` -- the photo header strip
 will simply be omitted (`pick_photos.py` already handles an empty pool
 gracefully). If the user later uploads photos to a `photos/` subfolder in
-`daily-briefing-cloud-data`, download those into `data/photos/pool/` too.
+`daily-briefing-cloud-data`, download those into `data/photos/pool/` too
+(as part of the same parallel batch).
 
 If any file doesn't exist yet (first-ever run, or a fresh install), proceed
 with empty/default state for that piece -- the scripts all handle missing
@@ -47,13 +62,24 @@ python withings-sync/withings_sync.py
 ```
 
 - `withings_sync.py` rewrites `withings-sync/.env` with a rotated refresh
-  token every run -- this updated file MUST be re-uploaded to Drive in step 8
+  token every run -- this updated file MUST be re-uploaded to Drive in step 7
   or the next run's sync will fail (Withings invalidates the old token).
 - If either script errors (bad credentials, Renpho backend change, etc.),
   log the error, note "sync failed, see logs" in the relevant report
   section, and continue with whatever history data already exists.
 
-## 3. Pull Google Calendar data
+## 3. Gather Calendar, Gmail, Era Context, and Nutrition data (in parallel)
+
+Steps 3a-3d below are fully independent of each other -- none of them reads
+output from another, and each is a self-contained round of connector calls.
+Launch four subagents together in a single batch (not one after another),
+one per sub-step, and let each work through its own instructions below;
+wait for all four to report back before moving on to step 4. This mirrors
+the same principle applied to transaction categorization inside 3c: give
+each independent unit of work its own agent instead of doing it all
+serially in one thread.
+
+### 3a. Google Calendar
 
 Using the Calendar connector:
 
@@ -69,7 +95,7 @@ Using the Calendar connector:
   "assignment", "module", course codes, etc. If nothing matches, omit that
   section entirely rather than forcing it.
 
-## 4. Pull Gmail highlights
+### 3b. Gmail highlights
 
 Using the Gmail connector: list unread messages in the inbox, pick out the
 ones that actually matter (billing/trial notices, deadlines, anything
@@ -77,7 +103,7 @@ actionable) -- not routine newsletters -- and summarize each in one sentence
 for the email callout / email-item cards. If nothing stands out, omit the
 email callout.
 
-## 5. Pull financial data from Era Context
+### 3c. Financial data from Era Context
 
 Using the Era Context connector:
 
@@ -90,7 +116,7 @@ Using the Era Context connector:
   automation rules configured in Era -- do not re-derive transfer exclusion
   yourself.
 
-### Categorize every transaction
+#### Categorize every transaction
 
 Read `data/merchant_categories.json`. For each transaction, match its
 description case-insensitively against the `rules` list top-to-bottom
@@ -98,9 +124,13 @@ description case-insensitively against the `rules` list top-to-bottom
 it yourself using the same category taxonomy visible in that file, then
 **append** a new `{match, category}` entry to the file so it's recognized
 automatically in future runs -- never re-decide a merchant already in the
-file, and never delete or reclassify existing entries.
+file, and never delete or reclassify existing entries. If the number of
+uncategorized/large-transaction lookups is large enough to be its own unit
+of work, delegate that categorization pass to a further subagent rather
+than doing it inline -- the same parallel-work principle this step is
+built around.
 
-### Recompute the finance data files
+#### Recompute the finance data files
 
 - `data/category_totals.json`: update the current month's `categories`
   totals (sum by category through today), `days_elapsed`, `finalized: false`.
@@ -116,7 +146,7 @@ file, and never delete or reclassify existing entries.
   `savings_target_usd`/`savings_target_date`/`savings_target_label` drive
   the budget pacing text if non-null.
 
-## 6. Pull nutrition data
+### 3d. Nutrition data
 
 Using the Drive connector, open this Google Doc/Sheet (the "Intake Ledger"):
 https://drive.google.com/file/d/1UtQYqzqIhfMmEIo9L0IkIQs7et53BaYo/view
@@ -126,7 +156,7 @@ each item with its source and calorie count, and compare the day's totals
 to the running average across all logged days to date. If there's no entry
 for yesterday, omit the Nutrition section.
 
-## 7. Log today's snapshot and build charts
+## 4. Log today's snapshot and build charts
 
 ```
 python scripts/log_daily_snapshot.py \
@@ -146,7 +176,7 @@ python scripts/pick_photos.py
 python scripts/make_charts.py
 ```
 
-## 8. Build the report and render the PDF
+## 5. Build the report and render the PDF
 
 Read `scripts/report_template_reference.html` for the exact CSS and section
 structure (every class name, gradient, and layout choice there is
@@ -163,7 +193,7 @@ Save it as `reports/<date>-full.html`, then:
 python scripts/render_pdf.py reports/<date>-full.html reports/<date>-full.pdf
 ```
 
-## 9. Deliver the report
+## 6. Deliver the report
 
 1. Upload `reports/<date>-full.pdf` to the `reports` subfolder inside the
    `daily-briefing-cloud-data` Drive folder (search for a subfolder titled
@@ -179,7 +209,7 @@ python scripts/render_pdf.py reports/<date>-full.html reports/<date>-full.pdf
    numbers (net worth, weight if fresh, steps) so the notification itself is
    useful even before opening the file.
 
-## 10. Persist state back to Drive
+## 7. Persist state back to Drive
 
 For each of these files that changed this run --
 `data/renpho_history.csv`, `data/withings_history.csv`,
@@ -188,8 +218,10 @@ For each of these files that changed this run --
 `data/category_totals.json`, `data/top_merchants.json`, and
 `withings-sync/.env` (rotated refresh token from step 2) -- find the
 existing file of that name in the `daily-briefing-cloud-data` Drive folder,
-trash it, and upload the new content under the same name. (`renpho.env` and
-`goals.json` don't change during a normal run -- leave them alone.)
+trash it, and upload the new content under the same name. As with step 1,
+issue these lookups and uploads as one parallel batch of calls rather than
+one file at a time. (`renpho.env` and `goals.json` don't change during a
+normal run -- leave them alone.)
 
 This step is not optional -- skipping it means tomorrow's run starts from
 stale history and a dead Withings token.
