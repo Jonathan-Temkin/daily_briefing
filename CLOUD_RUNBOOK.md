@@ -63,11 +63,25 @@ python withings-sync/withings_sync.py
 ```
 
 - `withings_sync.py` rewrites `withings-sync/.env` with a rotated refresh
-  token every run -- this updated file MUST be re-uploaded to Drive in step 7
-  or the next run's sync will fail (Withings invalidates the old token).
+  token every run -- Withings invalidates the old token as soon as the new
+  one is issued, so **immediately after `withings_sync.py` completes
+  successfully** (before moving on to step 3), find the existing
+  `withings.env` in the `daily-briefing-cloud-data` Drive folder, trash it,
+  and upload the new `withings-sync/.env` content under the same name. Do
+  not defer this to step 7 -- if anything later in the run fails or the
+  session ends early, a token re-upload batched at the end would never
+  happen, and next run would start from an already-dead token. (Step 7's
+  batch upload is still the home for the *other* changed files; this one
+  file just jumps the queue because losing it breaks the next run's sync
+  outright, where losing the others just means slightly stale history.)
 - If either script errors (bad credentials, Renpho backend change, etc.),
   log the error, note "sync failed, see logs" in the relevant report
-  section, and continue with whatever history data already exists.
+  section, and continue with whatever history data already exists. If
+  `withings_sync.py` itself fails (including an invalid/expired refresh
+  token), there is no new `.env` to upload -- leave the existing
+  `withings.env` in Drive untouched and flag in the report that Withings
+  needs manual re-authorization (see README.md's one-time setup notes for
+  `authorize.py`).
 
 ## 3. Gather Calendar, Gmail, Era Context, and Nutrition data (in parallel)
 
@@ -276,18 +290,19 @@ For each of these files that changed this run --
 `data/renpho_history.csv`, `data/withings_history.csv`,
 `data/daily_log.csv`, `data/renpho_latest.json`, `data/withings_latest.json`,
 `data/merchant_categories.json` (if any new merchant rules were appended),
-`data/category_totals.json`, `data/top_merchants.json`,
+`data/category_totals.json`, `data/top_merchants.json`, and
 `data/era_transactions_cache.json` (it changes essentially every run, since
-each run merges in at least the last few days), and `withings-sync/.env`
-(rotated refresh token from step 2) -- find the
+each run merges in at least the last few days) -- find the
 existing file of that name in the `daily-briefing-cloud-data` Drive folder,
 trash it, and upload the new content under the same name. As with step 1,
 issue these lookups and uploads as one parallel batch of calls rather than
 one file at a time. (`renpho.env` and `goals.json` don't change during a
-normal run -- leave them alone.)
+normal run -- leave them alone. `withings-sync/.env` is deliberately not in
+this batch -- it was already re-uploaded right after step 2, so that a
+later failure in this run can't cost the next run its Withings token.)
 
 This step is not optional -- skipping it means tomorrow's run starts from
-stale history and a dead Withings token.
+stale history.
 
 ## Notes
 
