@@ -16,8 +16,8 @@ leaving it to be improvised mid-run:
 
 - **Batched tool calls**: wherever a step involves several independent reads
   or writes against the same connector (e.g. the 12 Drive files in steps 1
-  and 7), issue them together as one wave of parallel calls, not one after
-  another.
+  and 7, or the chart PNGs uploaded before step 5), issue them together as
+  one wave of parallel calls, not one after another.
 - **Parallel subagents**: wherever a step's sub-parts are independent of
   each other and each involves real back-and-forth with a different data
   source, hand each sub-part to its own subagent and launch them together
@@ -239,6 +239,32 @@ python scripts/pick_photos.py
 python scripts/make_charts.py
 ```
 
+### Upload today's charts to Drive before writing the report
+
+Every tool available for getting content into Drive (or a Gmail attachment)
+requires the content inlined as a literal string in the tool call -- there
+is no streaming/file-path upload option. That makes a large single blob
+expensive to move: it has to be read back out of the local file and
+retyped into the call, which for anything much bigger than a report's own
+markup risks hitting per-call size limits or burning a lot of effort on
+chunked-read-and-reassemble workarounds. Charts are exactly that kind of
+blob, so don't fold them into the report file itself (neither as a
+relative-path `<img src>`, which silently breaks once the HTML leaves this
+sandbox and is opened from Drive, nor as inlined base64, which bloats a
+~40KB report into 500KB+ and makes every future run pay that same tax).
+
+Instead, upload each PNG in `data/charts/` as its own small file:
+
+- Find or create a subfolder named `<date>` inside a `charts` subfolder of
+  `reports` in the `daily-briefing-cloud-data` Drive folder (i.e.
+  `reports/charts/<date>/`), creating either level that doesn't exist yet.
+- Upload the chart PNGs from `data/charts/` into it, keeping their
+  filenames (e.g. `spend_trend.png`). These are small (tens of KB each),
+  so each uploads in one ordinary call with no chunking needed -- issue
+  the whole batch as one wave of parallel calls, same principle as steps 1
+  and 7.
+- For each uploaded file, note its Drive file id from the upload result.
+
 ## 5. Build the report
 
 Read `scripts/report_template_reference.html` for the exact CSS and section
@@ -250,16 +276,22 @@ callout, goal-pace info-box, stale-data warning) should be omitted entirely,
 matching the template's inline notes about when to skip them. Do not invent
 numbers, names, or transactions anywhere in the report.
 
+For each chart `<img>` tag, use the Drive-hosted direct-image URL from the
+upload above rather than a relative path or embedded base64:
+`https://drive.google.com/uc?export=view&id=<file id>`. This keeps the
+report HTML itself small (tens of KB, matching the template reference)
+regardless of how many charts it includes, and the images still render
+normally in a browser for the account that owns them (which this Drive
+folder already is) -- no separate sharing step needed for the chart files
+themselves, only for the report HTML in step 6 below.
+
 Save it as `reports/<date>-full.html`. **This HTML file is the deliverable
 -- do not also render it to PDF.** A Chromium PDF render of this template
 (box-shadows/gradients rasterize into large soft-mask images) lands well
-over 1MB, and every tool available for delivering it (Drive upload, Gmail
-attachment) requires the entire file inlined as base64 in a single tool
-call -- there is no streaming/file-path upload option. A file that size
-either fails outright or burns enormous effort on chunked-read-and-
-reassemble workarounds that still may not fit in one call. The HTML file
-carries the identical visual design (same CSS, same charts as `<img>` tags)
-and opens cleanly in any desktop or mobile browser -- including Gmail's own
+over 1MB, which runs straight into the same inline-content-only upload
+limitation described above. The HTML file carries the identical visual
+design (same CSS, same charts, now Drive-hosted rather than local) and
+opens cleanly in any desktop or mobile browser -- including Gmail's own
 in-app browser when opened from a Drive link -- so there's no real loss in
 switching to it as the sole format.
 
